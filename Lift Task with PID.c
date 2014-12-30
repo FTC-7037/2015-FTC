@@ -45,7 +45,7 @@ void RunLift(short nStage)
 	    //report error
 	    writeDebugStreamLine("S4 Fault");
 	    nxtDisplayCenteredBigTextLine(3, "S4 Fault");
-	    return;	//exit the function
+	    break;	//exit the function
 	    }
 	    if(SwitchState==false)//if switch open
 	    {

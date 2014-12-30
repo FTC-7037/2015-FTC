@@ -12,7 +12,7 @@ Sue shields-- helping me find the "dependant" form of I, this greatly simplified
 #define Kp 0.1//tuning for p
 #define Ki 0.0//tuning for i
 #define Kd 0.1//tuning for d
-#define Tolerance 5//how close is close enough?
+int Tolerance =5;//how close is close enough?
 #define dt 0.001 //duration of loop
 #define max_out 100 //ouput limits
 #define min_out -100//^^^^^^^^^^^^
