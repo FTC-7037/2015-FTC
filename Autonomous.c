@@ -20,13 +20,12 @@
 #pragma DebuggerWindows("debugStream")
 #include "JoystickDriver.c"  //Include file to "handle" the Bluetooth messages.
 #include "drivers/HTSPB-driver.h"
-#define START_RED     "Red"
-#define START_BLUE    "Blue"
 #define START_FLOOR  "FLOOR"
 #define START_RAMP "RAMP"
 #define TRUE 1
 #define FALSE 0
-string startColor;
+#define MIN (X, Y) (((X)<(Y) ?(X) : (Y)
+#define MAX (A, B) (((A)>(B) ?(X) : (Y)
 string startPosition;
 int GoalPosition =0;//must be initialized as zero so it can overide when/if LocateInfaRedBeacon() produces no change
 
@@ -46,31 +45,11 @@ void Test();
 task main()
 {
 	startTask(printf);
-//	getUserInput();
+	getUserInput();
 	initializeRobot();
-	Test();
-	//waitForStart();
-	//locateInfaRedBeacon();//determins GoalPosition
-	//for(int Count=0; Count<3; Count++)
-	//{
-	//	if(GoalPosition==1){
-	//	Routine1();
-	//	break;
-	//	}
-	//	else if(GoalPosition==2){
-	//	Routine2();
-	//	break;
-	//	}
-	//	else if(GoalPosition==3){
-	//	Routine3();
-	//	break;
-	//	}
-	//	else if(GoalPosition==0){
-	//	RoutineERR();
-	//	break;
-	//	}
-	//}
-	//clearDebugStream();
+	//Test();
+	waitForStart();
+	locateInfaRedBeacon();//determins GoalPosition
 }
 
 task printf()
@@ -79,38 +58,18 @@ task printf()
 	{
 	clearDebugStream();
 	writeDebugStreamLine("startPosition: %s", startPosition);
-	writeDebugStreamLine("startColor:    %s", startColor);
 	writeDebugStreamLine("GoalPosition: %i", GoalPosition);
-	wait10Msec(100);
+	delay(100);
 	clearDebugStream();
 	}
 }
 void initializeRobot()
 {
 	servo[Gripper]=80;
+	servo[lock]=127;
 }
 void getUserInput()
 {
-  //disableDiagnosticsDisplay();
-  nxtDisplayCenteredTextLine(0, "Red or Blue?");
-  nxtDisplayCenteredTextLine(7, "Red Blue");
-  while(true)
-  {
-    if(nNxtButtonPressed == 2)
-    {
-      startColor = START_RED;
-      nxtDisplayCenteredTextLine(0, "Red");
-      break;
-    }
-    else if(nNxtButtonPressed == 1)
-    {
-      startColor = START_BLUE;
-      nxtDisplayCenteredTextLine(0, "Blue");
-      break;
-    }
-  }
-  playSound(soundBlip);
-  wait1Msec(1000);
   nxtDisplayCenteredTextLine(1, "FLOOR or RAMP?");
   nxtDisplayCenteredTextLine(7, "FLOOR RAMP");
   while(true)
@@ -133,35 +92,61 @@ void getUserInput()
   playSound(soundFastUpwardTones);
   wait10Msec(200);
   //bDisplayDiagnostics = false;
-	nxtDisplayCenteredTextLine(0, "%s, %s",startColor, startPosition);
+	nxtDisplayCenteredTextLine(0, "%s", startPosition);
 }
 
 void Routine1()
 {
-Turn(-90);
-Drive(1.5);
-RunLift(4);
-Drive(-1.5);
-BumpConveyor();
-Drive(1.5);
-RunLift(-4);
-Drive(-1.5);
-Turn(90);
-Drive(12);
-Turn(90);
-Drive(36);
+	if(startPosition==START_RAMP)
+	{
+
+	return;
+	}
+	else if(startPosition==START_FLOOR)
+	{
+	return;
+	}
 }
+
+
 void Routine2()
 {
+	if(startPosition==START_RAMP)
+	{
 
+	return;
+	}
+	else if(startPosition==START_FLOOR)
+	{
+	return;
+	}
 }
+
+
 void Routine3()
 {
+	if(startPosition==START_RAMP)
+	{
 
+	return;
+	}
+	else if(startPosition==START_FLOOR)
+	{
+	return;
+	}
 }
+
 void RoutineERR()
 {
+	if(startPosition==START_RAMP)
+	{
 
+	return;
+	}
+	else if(startPosition==START_FLOOR)
+	{
+	return;
+	}
 }
 void locateInfaRedBeacon()
 {
@@ -255,8 +240,6 @@ void Drive(int distance)
 		while(nMotorEncoder[motorE]<=Target)
 		{
 		writeDebugStreamLine("Value :%i, Target: %i",nMotorEncoder[motorE], Target);
-		motor[motorD]=75;
-		motor[motorE]=75;
 		}
 		motor[motorD]=0;
 		motor[motorE]=0;

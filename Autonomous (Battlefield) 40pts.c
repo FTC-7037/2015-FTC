@@ -25,11 +25,13 @@
 #include "drivers/HTSPB-driver.h"
 #include "drivers/PID.h"
 #include "JoystickDriver.c"  //Include file to "handle" the Bluetooth messages.
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 #define START_RED     "Red"
 #define START_BLUE    "Blue"
 #define START_FLOOR  "FLOOR"
 #define START_RAMP "RAMP"
-
+#define Stop 0
 string startColor;
 string startPosition;
 int hasbeeninit = 0;
@@ -195,52 +197,52 @@ void initializeRobot()
 {
 	servo[Gripper]=80;
 }
-void getUserInput()
-{
-  //disableDiagnosticsDisplay();
-  nxtDisplayCenteredTextLine(0, "Red or Blue?");
-  nxtDisplayCenteredTextLine(7, "Red Blue");
-  while(true)
-  {
-    if(nNxtButtonPressed == 2)
-    {
-      startColor = START_RED;
-      nxtDisplayCenteredTextLine(0, "Red");
-      break;
-    }
-    else if(nNxtButtonPressed == 1)
-    {
-      startColor = START_BLUE;
-      nxtDisplayCenteredTextLine(0, "Blue");
-      break;
-    }
-  }
-  playSound(soundBlip);
-  wait1Msec(1000);
-  nxtDisplayCenteredTextLine(1, "FLOOR or RAMP?");
-  nxtDisplayCenteredTextLine(7, "FLOOR RAMP");
-  while(true)
-  {
-    if(nNxtButtonPressed == 2)
-    {
-      startPosition = START_FLOOR;
-      nxtDisplayCenteredTextLine(1, "FLOOR");
-      nxtDisplayCenteredTextLine(7, "");
-      break;
-    }
-    else if(nNxtButtonPressed == 1)
-    {
-      startPosition = START_RAMP;
-      nxtDisplayCenteredTextLine(1, "RAMP");
-      nxtDisplayCenteredTextLine(7, "");
-      break;
-    }
-  }
-  playSound(soundFastUpwardTones);
-  wait10Msec(200);
-  //bDisplayDiagnostics = false;
-	nxtDisplayCenteredTextLine(0, "%s, %s",startColor, startPosition);
-}
+//void getUserInput()
+//{
+//  disableDiagnosticsDisplay();
+//  nxtDisplayCenteredTextLine(0, "Red or Blue?");
+//  nxtDisplayCenteredTextLine(7, "Red Blue");
+//  while(true)
+//  {
+//    if(nNxtButtonPressed == 2)
+//    {
+//      startColor = START_RED;
+//      nxtDisplayCenteredTextLine(0, "Red");
+//      break;
+//    }
+//    else if(nNxtButtonPressed == 1)
+//    {
+//      startColor = START_BLUE;
+//      nxtDisplayCenteredTextLine(0, "Blue");
+//      break;
+//    }
+//  }
+//  playSound(soundBlip);
+//  wait1Msec(1000);
+//  nxtDisplayCenteredTextLine(1, "FLOOR or RAMP?");
+//  nxtDisplayCenteredTextLine(7, "FLOOR RAMP");
+//  while(true)
+//  {
+//    if(nNxtButtonPressed == 2)
+//    {
+//      startPosition = START_FLOOR;
+//      nxtDisplayCenteredTextLine(1, "FLOOR");
+//      nxtDisplayCenteredTextLine(7, "");
+//      break;
+//    }
+//    else if(nNxtButtonPressed == 1)
+//    {
+//      startPosition = START_RAMP;
+//      nxtDisplayCenteredTextLine(1, "RAMP");
+//      nxtDisplayCenteredTextLine(7, "");
+//      break;
+//    }
+//  }
+//  playSound(soundFastUpwardTones);
+//  wait10Msec(200);
+//  //bDisplayDiagnostics = false;
+//	nxtDisplayCenteredTextLine(0, "%s, %s",startColor, startPosition);
+//}
 
 void Routine1()
 {
@@ -383,34 +385,77 @@ void RunLift(short nStage)
 	return;
 }
 
+void Setspeed(int nspeed)
+{
+	motor[Right]=nspeed;
+	motor[Left]=nspeed;
+}
+void SetSpeed(int nLeftSpeed,int nRightSpeed)
+{
+	motor[Left]=nLeftSpeed;
+	motor[Right]=nRightSpeed;
+}
 void Drive(int distance, int power)
 {
 	int C=2*(PI)*2;
 	int Target= (1120/C)*distance;//en/in
+	int Proximity= 1100;
+	int Duration=5;
+	int Lspeed=0;
+	int Rspeed=0;
 	nMotorEncoder[Right]=0;
-	if(distance>1)
+	nMotorEncoder[Left]=0;
+while(nMotorEncoder[Right]!=Target || nMotorEncoder[Left]!=Target)
 	{
-		while(nMotorEncoder[Right]<=Target)
+	int Lenc nMotorEncoder[Left];
+	int Renc nMotorEncoder[Right];
+	CurrDistance=Target-((nMotorEncoder[Right]+nMotorEncoder[Left])/2)
+	//Difference= ( MAX(Lenc, Renc) - MIN(Lenc, Renc) );
+		if(CurrDistance<Target)
 		{
-		writeDebugStreamLine("Value :%i, Target: %i",nMotorEncoder[Right], Target);
-		motor[Right]=power;
-		motor[Left]=power;
+			// speed up until positive limit "power" reached
+			if(Lenc>Renc)//turn left
+			{
+				Lspeed-1;
+				Rspeed+1;
+			}
+			else if(Lenc<Renc)//turn right
+			{
+				Lspeed+1;
+				Lspeed-1;
+			}
+			else if(Lspeed==Rspeed && (Lspeed+Rspeed)/2)<power ) //speed up
+			{
+				Lspeed+1;
+				Rspeed+1;
+			}
+			else{}
 		}
-		motor[Right]=0;
-		motor[Left]=0;
-	}
-	else if(distance<1)
-	{
-		while(nMotorEncoder[Right]>=Target)
+		if(CurrDistance>Target)//slow down until backing up
 		{
-		writeDebugStreamLine("Value :%i, Target: %i",nMotorEncoder[Right]*-1, Target);
-		motor[Right]=-power;
-		motor[Left]=-power;
+			if (((Lspeed+Rspeed)/2)> (-1*power))// slowdown/ reverse until full speed backwards
+			{
+			Lspeed-1;
+			Rspeed-1;
+			}
+			if(Lenc>Renc)//turn Right
+			{
+				Lspeed+1;
+				Rspeed-1;
+			}
+			else if(Lenc<Renc)//turn left
+			{
+				Lspeed-1;
+				Lspeed+1;
+			}
+			else//do nothing
+			{}
 		}
-		motor[Right]=0;
-		motor[Left]=0;
+	Setspeed(Lspeed,Rspeed);
+	wait1Msec(Duration);
 	}
 }
+
 void Turn(int Angle)//clockwise is negitive
 {
 

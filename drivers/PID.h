@@ -2,22 +2,20 @@
 #define PID_H_
 /*
 Credit where credit is due:
-Dave Hawes -- introducing me to the concept
-David cohen-- showing me the real world application
-Sue shields-- helping me find the "dependant" form of I, this greatly simplified the process.
+Dave Hawes -- introducing me to the concept.
+David Cohen-- showing me the real world application..
+Sue Shields-- helping me find the "dependant" form of I, this greatly simplified the process.
+David Shiels-- demonstrating how to tune The PID controller.
 */
 
-
-//Define parameter
+//Define parameters
 #define Kp 0.1//tuning for p
-#define Ki 0.0//tuning for i
-#define Kd 0.1//tuning for d
+#define Ki 0.1//tuning for i
+#define Kd 0.0//tuning for d
 int Tolerance =5;//how close is close enough?
 #define dt 0.001 //duration of loop
 #define max_out 100 //ouput limits
 #define min_out -100//^^^^^^^^^^^^
-
-
 float PID(float setpoint,float ProcessValue)
 {
 	static float init_error= 0;
@@ -36,8 +34,7 @@ float PID(float setpoint,float ProcessValue)
 //Calculate D
 		derivative= (error -init_error)/dt;
 //COMPUTE PID
-		PIDoutput=Kp*error+ Ki*integral+ Kd*derivative;
-
+		PIDoutput=Kp*error + Ki*integral + Kd*derivative;
 		//limits the Range of PIDoutput to ensure not out of range
 		if(PIDoutput< min_out)
 		{
